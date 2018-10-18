@@ -1,10 +1,13 @@
 import * as types from './actionTypes';
 
+const DEFAULT_ERROR = types.SET_PRODUCTS_ERROR;
+
 const INITIAL_STATE = {
   favorite: [],
   checkout: [],
   data: [],
   error: null,
+  fetching: false,
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -20,15 +23,22 @@ export default (state = INITIAL_STATE, action) => {
         ...state,
         checkout: [...state.checkout, data],
       };
+    case types.GET_PRODUCTS:
+      return {
+        ...state,
+        fetching: true,
+      };
     case types.SET_PRODUCTS:
       return {
         ...state,
         data,
+        fetching: false,
       };
     case types.SET_PRODUCTS_ERROR:
       return {
         ...state,
-        error: data,
+        error: DEFAULT_ERROR,
+        fetching: false,
       };
     case types.REMOVE_FROM_FAVORITE:
       return {

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, bindActionCreators } from 'redux';
 import { Route, Redirect, Switch, withRouter } from 'react-router-dom';
+import { AtomSpinner } from 'react-epic-spinners';
 
 import Navbar from './components/navbar';
 import Home from './pages/Home';
@@ -14,25 +15,35 @@ import shop from './shop';
 
 import '../style/index.css';
 
-const ENDPOINT =
-  'https://boiling-reaches-93648.herokuapp.com/food-shop/products';
+// const ENDPOINT =
+//   'https://boiling-reaches-93648.herokuapp.com/food-shop/products';
 
 const ROUTES = ['home', 'favorites', 'checkout'];
 class App extends React.Component {
   componentDidMount() {
-    const { setProducts, setProductsError, products } = this.props;
-    if (!products.length) {
-      fetch(ENDPOINT)
-        .then(resp => resp.json())
-        .then(data => setProducts(data))
-        .catch(() => {
-          setProductsError();
-        });
-    }
+    const { getProducts } = this.props;
+    getProducts();
+    // const { setProducts, setProductsError, products } = this.props;
+    // if (!products.length) {
+    //   fetch(ENDPOINT)
+    //     .then(resp => resp.json())
+    //     .then(data => setProducts(data))
+    //     .catch(() => {
+    //       setProductsError();
+    //     });
+    // }
   }
 
   render() {
-    const { error } = this.props;
+    const { error, fetching } = this.props;
+
+    if (fetching) {
+      return (
+        <div className="spinner">
+          <AtomSpinner color="#199" size="300" />
+        </div>
+      );
+    }
 
     return (
       <div className="App-container">
@@ -54,9 +65,11 @@ class App extends React.Component {
 }
 
 App.propTypes = {
-  setProducts: PropTypes.func.isRequired,
-  setProductsError: PropTypes.func.isRequired,
-  products: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  // setProducts: PropTypes.func.isRequired,
+  // setProductsError: PropTypes.func.isRequired,
+  // products: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  getProducts: PropTypes.func.isRequired,
+  fetching: PropTypes.bool.isRequired,
   error: PropTypes.string,
 };
 
@@ -70,12 +83,12 @@ const enhance = compose(
     state => ({
       products: shop.selectors.getProducts(state),
       error: shop.selectors.getError(state),
+      fetching: shop.selectors.isFething(state),
     }),
     dispatch =>
       bindActionCreators(
         {
-          setProducts: shop.actions.setProducts,
-          setProductsError: shop.actions.setProductsError,
+          getProducts: shop.actions.getProducts,
         },
         dispatch
       )
